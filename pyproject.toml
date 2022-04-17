@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "arunbins"
+name = "arunapi"
 version = "0.1.0"
 description = ""
 authors = ["Tom Whitwell <tom@whi.tw>"]
@@ -12,6 +12,8 @@ uk-postcode-utils = "^1.1"
 beautifulsoup4 = "^4.11.1"
 flask-restx = "^0.5.1"
 gunicorn = "^20.1.0"
+redis = "^4.2.2"
+semver = "^2.13.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

@@ -10,8 +10,9 @@
       "request": "launch",
       "module": "flask",
       "env": {
-        "FLASK_APP": "arunbins/app.py",
-        "FLASK_ENV": "development"
+        "FLASK_APP": "arunapi/app.py",
+        "FLASK_ENV": "development",
+        "REDIS_URL": "redis://127.0.0.1:6379"
       },
       "args": ["run", "--no-debugger"],
       "jinja": true,

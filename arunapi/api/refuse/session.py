@@ -1,4 +1,4 @@
-from typing import Dict, List, NamedTuple
+from typing import Dict, List, NamedTuple, TypedDict, Tuple
 import requests
 
 from datetime import datetime
@@ -8,9 +8,11 @@ from werkzeug.exceptions import InternalServerError, BadRequest
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+from redis import Redis
+
 from ukpostcodeutils import validation
 
-from .types import ApiSession
+from ..typing import ApiSession, NotInCache, CacheMeta
 
 
 class InvalidPostcode(BadRequest):
@@ -31,8 +33,17 @@ class FormData(NamedTuple):
     inputs: Dict[str, str]
 
 
-class BinsApiSession(ApiSession):
-    def __init__(self, postcode: str) -> None:
+class RefuseSession(ApiSession):
+    API_BASEURL = "https://www1.arun.gov.uk/external"
+
+    class Result(TypedDict):
+        collection_day: str
+        next_rubbish: datetime
+        next_recycling: datetime
+        next_food_waste: datetime
+
+    def __init__(self, redis: Redis, postcode: str) -> None:
+        super().__init__(redis)
         self.session = requests.Session()
         self.postcode = self._validate_postcode(postcode)
 
@@ -84,23 +95,33 @@ class BinsApiSession(ApiSession):
                     res["inputs"][input["name"]] = input["value"]
                 elif prefix and input["name"].startswith(prefix):
                     res["inputs"][input["name"]] = input["value"]
-            except:
+            except Exception:
                 pass
         return FormData(**res)
 
-    def parse_collection_info(self, lines: List[str]) -> dict:
-        data = {}
+    def parse_collection_info(self, lines: List[str]) -> Result:
+        data = self.Result()
         for line in lines[1:]:
             words = line.strip().split(" ")
             if "are on a" in line:
                 data["collection_day"] = words[-1].split(".")[0]
             if "rubbish" in line:
-                data["next_rubbish"] = datetime.strptime(words[-1], "%d/%m/%Y").date()
+                data["next_rubbish"] = datetime.strptime(words[-1], "%d/%m/%Y")
             if "recycling" in line:
-                data["next_recycling"] = datetime.strptime(words[-1], "%d/%m/%Y").date()
+                data["next_recycling"] = datetime.strptime(words[-1], "%d/%m/%Y")
+            if "food waste" in line:
+                data["next_food_waste"] = datetime.strptime(words[-1], "%d/%m/%Y")
         return data
 
-    def get_results(self) -> FormData:
+    def store_cache(self, data: Result) -> Tuple[Result, CacheMeta]:
+        expiry = min(data["next_recycling"], data["next_rubbish"])
+        return super().store_cache(self.postcode, data, expiry)
+
+    def get_results(self) -> Tuple[Result, CacheMeta]:
+        try:
+            return self.retrieve_cache(self.postcode)
+        except NotInCache:
+            pass
         init_session = self.get("/Cleansing_GDS_CollectionsSchedule.ofml")
         formdata = self._parse_form_from_page(init_session)
         post_resp = self._form_data_request(formdata)
@@ -120,7 +141,9 @@ class BinsApiSession(ApiSession):
             for x in results.find("div", {"class": "dlgmsg"}).contents
             if type(x) != Tag
         ]
-        return self.parse_collection_info(collection_info)
+        result = self.parse_collection_info(collection_info)
+        result, cache_meta = self.store_cache(result)
+        return result, cache_meta
 
     def _validate_postcode(self, postcode: str) -> str:
         postcode = postcode.upper().strip()
