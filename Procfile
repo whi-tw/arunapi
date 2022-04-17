@@ -1,1 +1,1 @@
-web: gunicorn arunbins.app:app
+web: gunicorn arunapi.app:app
