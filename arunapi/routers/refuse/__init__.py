@@ -10,10 +10,12 @@ router = APIRouter(prefix="/refuse", tags=["Refuse"])
 
 
 @router.get("/next_collection/{postcode}", response_model=RefuseCollection)
-async def get_next_collection(postcode: PostCode):
+async def get_next_collection(postcode: PostCode, request: Request, response: Response):
     async with AsyncClient() as session:
-        s = RefuseSession(session, postcode)
-        return await s.get_results()
+        s = RefuseSession(session, request.app.state.cache, postcode)
+        data, expiry = await s.get_results()
+        response.headers["X-Cache-Expires"] = str(expiry)
+        return data
 
 
 @router.get(
@@ -41,5 +43,5 @@ async def collection_calendar(
     ),
 ):
     async with AsyncClient() as session:
-        s = RefuseSession(session, postcode)
+        s = RefuseSession(session, request.app.state.cache, postcode)
         return await s.get_calendar(baseurl=request.base_url, transparent=transparent)

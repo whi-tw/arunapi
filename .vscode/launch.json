@@ -10,6 +10,9 @@
       "request": "launch",
       "module": "uvicorn",
       "args": ["arunapi.main:app", "--reload"],
+      "env": {
+        "REDIS_URL": "redis://127.0.0.1:6379"
+      },
       "jinja": true,
       "justMyCode": true
     },

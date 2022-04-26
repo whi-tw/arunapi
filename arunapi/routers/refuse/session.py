@@ -1,25 +1,31 @@
+import json
 from datetime import date, datetime
-from typing import Dict, List, NamedTuple
+from typing import Dict, List, NamedTuple, Tuple
 
 import httpx
 from bs4 import BeautifulSoup, Tag
 from fastapi import HTTPException, status
 
 from ... import __version__
+from ...cache import Cache, NotInCache
 from ...models.postcode import PostCode
 from .models import RefuseCollection
 
 
 class RefuseSession:
     API_BASEURL = "https://www1.arun.gov.uk/external"
+    CACHE_NAMESPACE = "refuse_session"
 
     class FormData(NamedTuple):
         action: str
         method: str
         inputs: Dict[str, str]
 
-    def __init__(self, session: httpx.AsyncClient, postcode: PostCode) -> None:
+    def __init__(
+        self, session: httpx.AsyncClient, cache: Cache, postcode: PostCode
+    ) -> None:
         self.session = session
+        self.cache = cache
         self.postcode = postcode
 
     async def _do_request(
@@ -100,7 +106,13 @@ class RefuseSession:
                 data["next_food_waste"] = datetime.strptime(words[-1], "%d/%m/%Y")
         return RefuseCollection(**data)
 
-    async def get_results(self) -> RefuseCollection:
+    async def get_results(self) -> Tuple[RefuseCollection, float]:
+        CACHE_KEY = (f"next_collection.{self.postcode.postcode}", self.CACHE_NAMESPACE)
+        try:
+            cached, expiry = await self.cache.get_cache(*CACHE_KEY)
+            return RefuseCollection(**json.loads(cached)), expiry
+        except NotInCache:
+            pass
         init_session = await self.get("/Cleansing_GDS_CollectionsSchedule.ofml")
         formdata = self._parse_form_from_page(init_session)
         post_resp = await self._form_data_request(formdata)
@@ -121,7 +133,12 @@ class RefuseSession:
             if type(x) != Tag
         ]
         result = self.parse_collection_info(collection_info)
-        return result
+        soonest_end = min(
+            result.next_recycling, result.next_rubbish, result.next_rubbish
+        )
+        ttl = datetime.fromordinal(soonest_end.toordinal()) - datetime.now()
+        await self.cache.set_cache(result.json(), *CACHE_KEY, ttl=ttl)
+        return result, ttl.seconds
 
     def cal_event_uid(self, date: date):
         from hashlib import sha256
@@ -134,7 +151,7 @@ class RefuseSession:
     async def get_calendar(self, baseurl: str, transparent: bool) -> str:
         from ics import Calendar, Event
 
-        results = await self.get_results()
+        results, _ = await self.get_results()
         events = []
         evt_rubbish = Event(
             name="Rubbish Collection",

@@ -15,6 +15,7 @@ postcode-validator = "^0.0.4"
 httpx = "^0.22.0"
 email-validator = "^1.2.0"
 ics = "^0.7"
+cashews = {extras = ["redis"], version = "^4.2.1"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

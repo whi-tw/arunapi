@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Request, Response
+from fastapi import Depends, FastAPI, Request, Response
 
 from . import __version__
+from .cache import Cache
 from .routers import refuse
 
 app = FastAPI(
@@ -24,3 +25,9 @@ async def add_cache_control_header(request: Request, call_next):
 
 
 app.include_router(refuse.router)
+
+
+@app.on_event("startup")
+async def init_cache():
+    cache = Cache()
+    app.state.cache = cache
