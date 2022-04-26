@@ -5,6 +5,15 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Python: FastAPI",
+      "type": "python",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["arunapi.main:app", "--reload"],
+      "jinja": true,
+      "justMyCode": true
+    },
+    {
       "name": "Python: Flask",
       "type": "python",
       "request": "launch",
