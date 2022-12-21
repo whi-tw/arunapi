@@ -1,7 +1,6 @@
 services:
   app:
-    image: app
-    build: .
+    image: ghcr.io/whi-tw/arunapi/arunapi:latest
     ports:
       - "8000:8000"
     environment:
