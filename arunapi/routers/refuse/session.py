@@ -107,12 +107,12 @@ class RefuseSession:
         return RefuseCollection(**data)
 
     async def get_results(self) -> Tuple[RefuseCollection, float]:
-        CACHE_KEY = (f"next_collection.{self.postcode.postcode}", self.CACHE_NAMESPACE)
-        try:
-            cached, expiry = await self.cache.get_cache(*CACHE_KEY)
-            return RefuseCollection(**json.loads(cached)), expiry
-        except NotInCache:
-            pass
+        # CACHE_KEY = (f"next_collection.{self.postcode.postcode}", self.CACHE_NAMESPACE)
+        # try:
+        #     cached, expiry = await self.cache.get_cache(*CACHE_KEY)
+        #     return RefuseCollection(**json.loads(cached)), expiry
+        # except NotInCache:
+        #     pass
         init_session = await self.get("/Cleansing_GDS_CollectionsSchedule.ofml")
         formdata = self._parse_form_from_page(init_session)
         post_resp = await self._form_data_request(formdata)
@@ -137,7 +137,7 @@ class RefuseSession:
             result.next_recycling, result.next_rubbish, result.next_rubbish
         )
         ttl = datetime.fromordinal(soonest_end.toordinal()) - datetime.now()
-        await self.cache.set_cache(result.json(), *CACHE_KEY, ttl=ttl)
+        # await self.cache.set_cache(result.json(), *CACHE_KEY, ttl=ttl)
         return result, ttl.seconds
 
     def cal_event_uid(self, date: date):
