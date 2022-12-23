@@ -66,7 +66,7 @@ Create the value of the REDIS_URL envar
 */}}
 {{- define "chart.redisUrlEnvar" -}}
 {{- if .Values.redis.enabled -}}
-redis://{{ include "chart.fullname" . }}-redis:6379
+redis://{{ include "chart.fullname" . }}-redis:{{ .Values.redis.servicePort }}
 {{- else -}}
 false
 {{- end }}
