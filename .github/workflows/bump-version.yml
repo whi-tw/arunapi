@@ -38,3 +38,7 @@ jobs:
           git commit -a -m "Bump to ${{ fromJSON(steps.version.outputs.version).next_version }}"
           git tag "${{ fromJSON(steps.version.outputs.version).next_tag }}"
           git push && git push --tags
+      - name: Trigger build
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          event-type: build-image
