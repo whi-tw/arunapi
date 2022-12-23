@@ -1,6 +1,7 @@
 name: Bump Version
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -29,9 +30,11 @@ jobs:
         run: |
           yq e -i '.appVersion = "${{ fromJSON(steps.version.outputs.version).next_version }}"' ./chart/Chart.yaml
           yq e -i '.version = "${{ fromJSON(steps.version.outputs.version).next_version }}"' ./chart/Chart.yaml
-      - name: test files were updated
+      - name: Commit, create tag and push
+        if: github.event_name == 'push'
         run: |
-          echo fastapi
-          cat ./arunapi/__init__.py
-          echo chart
-          cat ./chart/Chart.yaml
+          git config --global user.name "Github Actions"
+          git config --global user.email "whi-tw@users.noreply.github.com"
+          git commit -a -m "Bump to ${{ fromJSON(steps.version.outputs.version).next_version }}"
+          git tag "${{ fromJSON(steps.version.outputs.version).next_tag }}"
+          git push && git push --tags
