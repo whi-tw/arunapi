@@ -1,3 +1,5 @@
+name: Bump Version
+
 on:
   push:
     branches:
@@ -9,22 +11,27 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
           fetch-depth: 0
-      - name: 🏗 Create new version from git tag
+      - name: 🏗 Install Poetry
+        uses: snok/install-poetry@v1
+      - name: 🏗 Install ci dependencies
+        run: poetry install --only=ci
+      - name: Generate new version
         id: version
-        uses: codacy/git-version@2.7.1
+        run: echo version="$(poetry run python ci/bump_version.py)" >> $GITHUB_OUTPUT
       - name: ⬆ Update fastapi __version__
         run: |
-          echo '__version__ = "${{ steps.version.outputs.version }}"' \
+          echo '__version__ = "${{ fromJSON(steps.version.outputs.version).next_version }}"' \
           | tee ./arunapi/__init__.py
       - name: 🏗 Set up yq
         uses: frenck/action-setup-yq@v1
       - name: ⬆ Update helm chart version
         run: |
-          yq e -i '.appVersion = "${{ steps.version.outputs.version }}"' ./chart/Chart.yaml
+          yq e -i '.appVersion = "${{ fromJSON(steps.version.outputs.version).next_version }}"' ./chart/Chart.yaml
+          yq e -i '.version = "${{ fromJSON(steps.version.outputs.version).next_version }}"' ./chart/Chart.yaml
       - name: test files were updated
         run: |
           echo fastapi
           cat ./arunapi/__init__.py
+          echo chart
           cat ./chart/Chart.yaml

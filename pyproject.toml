@@ -25,6 +25,10 @@ flake8 = "^4.0.1"
 [tool.poetry.scripts]
 dev = "arunapi.dev:run_dev"
 
+[tool.poetry.group.ci.dependencies]
+semver = "^2.13.0"
+gitpython = "^3.1.29"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
