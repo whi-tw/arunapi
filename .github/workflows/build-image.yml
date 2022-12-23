@@ -30,10 +30,11 @@ jobs:
         with:
           images: ghcr.io/whi-tw/arunapi/arunapi
           tags: |
-            type=sha,format=long,prefix=,suffix=${{ inputs.tag_suffix && format('-{0}', inputs.tag_suffix) }}
-            type=ref,event=branch,suffix=${{ inputs.tag_suffix && format('-{0}', inputs.tag_suffix) }}
-            type=ref,event=pr,suffix=${{ inputs.tag_suffix && format('-{0}', inputs.tag_suffix) }}
-            type=raw,value=latest,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }},suffix=${{ inputs.tag_suffix && format('-{0}', inputs.tag_suffix) }}
+            type=sha,format=long
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=raw,value=latest,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
           labels: |
             org.opencontainers.image.url=https://github.com/whi-tw/arunapi
             org.opencontainers.image.source=https://github.com/whi-tw/arunapi
