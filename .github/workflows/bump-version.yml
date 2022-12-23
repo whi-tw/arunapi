@@ -1,0 +1,30 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: 🏗 Create new version from git tag
+        id: version
+        uses: codacy/git-version@2.7.1
+      - name: ⬆ Update fastapi __version__
+        run: |
+          echo '__version__ = "${{ steps.version.outputs.version }}"' \
+          | tee ./arunapi/__init__.py
+      - name: 🏗 Set up yq
+        uses: frenck/action-setup-yq@v1
+      - name: ⬆ Update helm chart version
+        run: |
+          yq e -i '.appVersion = "${{ steps.version.outputs.version }}"' ./chart/Chart.yaml
+      - name: test files were updated
+        run: |
+          echo fastapi
+          cat ./arunapi/__init__.py
+          cat ./chart/Chart.yaml
