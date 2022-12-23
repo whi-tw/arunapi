@@ -2,8 +2,9 @@ name: Build Docker image
 
 on:
   pull_request:
-  push:
+  create:
     tags:
+      - v*
 
 jobs:
   build:
