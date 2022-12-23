@@ -28,7 +28,7 @@ jobs:
         uses: frenck/action-setup-yq@v1
       - name: ⬆ Update helm chart version
         run: |
-          yq e -i '.appVersion = "${{ fromJSON(steps.version.outputs.version).next_version }}"' ./chart/Chart.yaml
+          yq e -i '.appVersion = "${{ fromJSON(steps.version.outputs.version).next_tag }}"' ./chart/Chart.yaml
           yq e -i '.version = "${{ fromJSON(steps.version.outputs.version).next_version }}"' ./chart/Chart.yaml
       - name: Commit, create tag and push
         if: github.event_name == 'push'
