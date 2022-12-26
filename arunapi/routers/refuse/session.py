@@ -1,5 +1,5 @@
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Dict, List, NamedTuple, Tuple
 
 import httpx
@@ -38,8 +38,12 @@ class RefuseSession:
     ) -> BeautifulSoup:
         if path:
             url = f"{self.API_BASEURL}{path}"
-
-        r = await self.session.request(method, url, **kwargs)
+        try:
+            r = await self.session.request(method, url, **kwargs)
+        except httpx.ReadTimeout as e:
+            raise Exception(
+                f"Timeout while making {method.upper()} request to {url}"
+            ) from e
         if not r.status_code == expected_code:
             raise HTTPException(
                 status.HTTP_502_BAD_GATEWAY,
@@ -113,6 +117,7 @@ class RefuseSession:
             return RefuseCollection(**json.loads(cached)), expiry
         except NotInCache:
             pass
+
         init_session = await self.get("/Cleansing_GDS_CollectionsSchedule.ofml")
         formdata = self._parse_form_from_page(init_session)
         post_resp = await self._form_data_request(formdata)
@@ -137,6 +142,8 @@ class RefuseSession:
             result.next_recycling, result.next_rubbish, result.next_rubbish
         )
         ttl = datetime.fromordinal(soonest_end.toordinal()) - datetime.now()
+        if ttl <= 0:
+            ttl = timedelta(minutes=15)
         await self.cache.set_cache(result.json(), *CACHE_KEY, ttl=ttl)
         return result, ttl.seconds
 
