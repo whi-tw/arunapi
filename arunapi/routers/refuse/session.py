@@ -1,5 +1,5 @@
 import json
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from typing import Dict, List, NamedTuple, Tuple
 
 import httpx
