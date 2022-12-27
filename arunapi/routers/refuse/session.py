@@ -141,9 +141,11 @@ class RefuseSession:
         soonest_end = min(
             result.next_recycling, result.next_rubbish, result.next_rubbish
         )
-        ttl = datetime.fromordinal(soonest_end.toordinal()) - datetime.now()
-        if ttl <= 0:
-            ttl = timedelta(minutes=15)
+        soonest_end_dt = datetime.fromordinal(soonest_end.toordinal())
+        if soonest_end_dt < datetime.now():
+            ttl = datetime.timedelta(minutes=15)
+        else:
+            ttl = soonest_end_dt - datetime.now()
         await self.cache.set_cache(result.json(), *CACHE_KEY, ttl=ttl)
         return result, ttl.seconds
 
