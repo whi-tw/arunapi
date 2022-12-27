@@ -10,9 +10,15 @@ image:
 
 redis:
   enabled: true
-  imageTag: latest
+  image:
+    repository: redis
+    imageTag: latest
   servicePort: 6379
   resources: {}
+  persistence:
+    enabled: true
+    storageClassName: ""
+    size: 3Gi
 
 imagePullSecrets: []
 nameOverride: ""

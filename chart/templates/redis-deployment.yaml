@@ -19,13 +19,24 @@ spec:
       labels:
         {{- include "chart.selectorLabels" . | nindent 8 }}
     spec:
+      {{- if .Values.redis.persistence.enabled }}
+      volumes:
+        - name: redis-persistence-storage
+          persistentVolumeClaim:
+            claimName: data-{{ include "chart.name" . }}-redis-master
+      {{- end }}
       containers:
         - name: redis-master
-          image: "redis:{{ .Values.redis.imageTag }}"
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.imageTag }}"
           ports:
             - name: redis
               containerPort: 6379
               protocol: TCP
+          {{- if .Values.redis.persistence.enabled }}
+          volumeMounts:
+            - mountPath: /data
+              name: redis-persistence-storage
+          {{- end }}
           livenessProbe:
             tcpSocket:
               port: redis
@@ -44,20 +55,4 @@ spec:
             periodSeconds: 3
           resources:
             {{- toYaml .Values.redis.resources | nindent 12 }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "chart.fullname" . }}-redis
-  labels:
-    {{- include "chart.labels" . | nindent 4 }}
-spec:
-  ports:
-  - port: {{ .Values.redis.servicePort }}
-    targetPort: 6379
-    protocol: TCP
-    name: redis
-  selector:
-    {{- include "chart.selectorLabels" . | nindent 4 }}
-
 {{- end }}

@@ -1,0 +1,15 @@
+{{- if .Values.redis.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-{{ include "chart.name" . }}-redis-master
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  storageClassName: {{ .Values.redis.persistence.storageClassName }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.redis.persistence.size | quote }}
+{{- end }}
