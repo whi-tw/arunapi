@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import json
 import sys
+from functools import cmp_to_key
 
 import semver
 from git import Repo, TagReference
@@ -14,8 +15,16 @@ def version_from_tag(tag: TagReference) -> str:
         return tag
 
 
+def compare_tags(a: TagReference, b: TagReference) -> int:
+    a_v = version_from_tag(a)
+    b_v = version_from_tag(b)
+    return semver.compare(a_v, b_v)
+
+
 def _bump_data(repo: Repo = Repo(), bump_type: str = "patch") -> dict:
-    latest_tag = repo.tags[-1]
+    tags_sorted = sorted(repo.tags, key=cmp_to_key(compare_tags), reverse=True)
+
+    latest_tag = tags_sorted[0]
 
     latest_version = version_from_tag(latest_tag)
     latest_version_semver = semver.VersionInfo.parse(latest_version)
