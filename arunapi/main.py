@@ -1,10 +1,14 @@
 import logging
 
 from fastapi import FastAPI, Request, Response
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from . import __version__
 from .cache import Cache
 from .routers import refuse
+from .settings import Settings
+
+settings = Settings()
 
 app = FastAPI(
     title="Arun DC API",
@@ -17,6 +21,7 @@ app = FastAPI(
     },
     docs_url="/",
 )
+app.state.settings = settings
 
 
 @app.middleware("http")
@@ -31,7 +36,7 @@ app.include_router(refuse.router)
 
 @app.on_event("startup")
 async def init_cache():
-    cache = Cache()
+    cache = Cache(settings.cache_url)
     app.state.cache = cache
 
 
@@ -52,6 +57,10 @@ async def disable_logging_health_endpoint():
 async def health_endpoint(response: Response):
     cache: Cache = app.state.cache
     cache_health = await cache.health()
+    environment: str = app.state.settings.environment
     if cache_health != "OK":
         response.status_code = 500
-    return {"cache": cache_health}
+    return {"cache": cache_health, "environment": environment}
+
+
+FastAPIInstrumentor.instrument_app(app)

@@ -5,6 +5,7 @@ from typing import Dict, List, NamedTuple, Tuple
 import httpx
 from bs4 import BeautifulSoup, Tag
 from fastapi import HTTPException, status
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 
 from ... import __version__
 from ...cache import Cache, NotInCache
@@ -27,6 +28,8 @@ class RefuseSession:
         self.session = session
         self.cache = cache
         self.postcode = postcode
+
+        HTTPXClientInstrumentor.instrument_client(session)
 
     async def _do_request(
         self,

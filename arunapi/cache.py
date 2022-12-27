@@ -1,5 +1,4 @@
 import logging
-import os
 from datetime import datetime, timedelta
 from typing import Any, Tuple, Union
 
@@ -15,34 +14,16 @@ class CacheSetFailed(Exception):
 
 
 class Cache:
-    def __init__(self) -> None:
+    def __init__(self, cache_url: str) -> None:
         self.logger = logging.getLogger("cashews")
         self.cache = Cashews()
-        self.cache_url: str = self._cache_url()
+        self.cache_url: str = cache_url
         if self.cache_url:
             self.cache.setup(self.cache_url)
             self.logger.info(f"Cache Configured: {self.cache_url}")
         else:
             self.cache.disable()
-            self.logger.warn("Cache Disabled")
-
-    def _cache_url(self) -> str:
-        try:
-            return os.environ["REDIS_URL"]
-        except KeyError:
-            pass
-        try:
-            local_memory_cache = os.environ["MEMORY_CACHE"]
-            try:
-                cache_size = int(local_memory_cache)
-            except ValueError:
-                cache_size = 500
-            self.logger.warning(f"Using local {cache_size}MB RAM cache.")
-            return f"mem://?size={cache_size}"
-        except KeyError:
-            pass
-
-        return None
+            self.logger.warning("Cache Disabled")
 
     @staticmethod
     def build_key(key: str, namespace: str) -> str:
