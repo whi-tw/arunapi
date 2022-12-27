@@ -6,7 +6,9 @@ metadata:
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 spec:
+  {{- if .Values.redis.persistence.storageClassName }}
   storageClassName: {{ .Values.redis.persistence.storageClassName }}
+  {{- end }}
   accessModes:
     - ReadWriteOnce
   resources:
