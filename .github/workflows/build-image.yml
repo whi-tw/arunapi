@@ -37,7 +37,7 @@ jobs:
         run: poetry install --only=ci
       - name: Generate new version
         id: version
-        run: echo version="$(poetry run python ci/bump_version.py)" >> $GITHUB_OUTPUT
+        run: echo version="$(poetry run bump_data__patch)" >> $GITHUB_OUTPUT
       - name: Extract metadata (tags, labels) for ghcr
         id: meta-ghcr
         uses: docker/metadata-action@v4
