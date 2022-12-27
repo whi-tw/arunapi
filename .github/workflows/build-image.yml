@@ -42,7 +42,7 @@ jobs:
         id: meta-ghcr
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/whi-tw/arunapi/arunapi
+          images: ghcr.io/whi-tw/arunapi
           tags: |
             type=sha,format=long
             type=ref,event=branch
