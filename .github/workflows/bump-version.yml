@@ -19,7 +19,7 @@ jobs:
         run: poetry install --only=ci
       - name: Generate new version
         id: version
-        run: echo version="$(poetry run python ci/bump_version.py)" >> $GITHUB_OUTPUT
+        run: echo version="$(poetry run bump_data__patch)" >> $GITHUB_OUTPUT
       - name: ⬆ Update fastapi __version__
         run: |
           echo '__version__ = "${{ fromJSON(steps.version.outputs.version).next_version }}"' \

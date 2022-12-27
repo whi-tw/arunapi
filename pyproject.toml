@@ -34,6 +34,7 @@ dev = "arunapi.dev:run_dev"
 bump_data__patch = "ci.bump_version:bump_patch"
 bump_data__minor = "ci.bump_version:bump_minor"
 bump_data__major = "ci.bump_version:bump_major"
+current_version = "arunapi.dev:current_version"
 
 [tool.poetry.group.ci.dependencies]
 semver = "^2.13.0"
