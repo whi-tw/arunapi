@@ -122,6 +122,11 @@ class RefuseSession:
             pass
 
         init_session = await self.get("/Cleansing_GDS_CollectionsSchedule.ofml")
+        if "Form temporarily unavailable" in init_session.text:
+            raise HTTPException(
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The upstream form is unavailable",
+            )
         formdata = self._parse_form_from_page(init_session)
         post_resp = await self._form_data_request(formdata)
         search_form = self._parse_form_from_page(post_resp)
