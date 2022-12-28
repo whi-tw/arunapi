@@ -48,7 +48,7 @@ spec:
           env:
             - name: PORT
               value: "{{ .Values.service.port }}"
-            - name: REDIS_URL
+            - name: CACHE__REDIS_URL
               value: "{{ include "chart.redisUrlEnvar" . }}"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

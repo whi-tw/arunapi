@@ -12,6 +12,6 @@ RUN poetry config virtualenvs.create false \
 COPY arunapi /app/arunapi
 COPY docker-entrypoint.sh /
 
-EXPOSE ${PORT}
+EXPOSE 8000
 
 CMD ["/docker-entrypoint.sh"]

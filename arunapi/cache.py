@@ -4,6 +4,8 @@ from typing import Any, Tuple, Union
 
 from cashews import Cache as Cashews
 
+from .settings import CacheSettings
+
 
 class NotInCache(Exception):
     pass
@@ -14,13 +16,18 @@ class CacheSetFailed(Exception):
 
 
 class Cache:
-    def __init__(self, cache_url: str) -> None:
+    def __init__(self, settings: CacheSettings) -> None:
         self.logger = logging.getLogger("cashews")
         self.cache = Cashews()
-        self.cache_url: str = cache_url
-        if self.cache_url:
-            self.cache.setup(self.cache_url)
-            self.logger.info(f"Cache Configured: {self.cache_url}")
+        self.settings = settings
+        if settings.redis_url:
+            self.cache.setup(settings.redis_url)
+            self.logger.info(f"Redis cache Configured: '{settings.redis_url}'")
+        elif settings.memory_cache_url:
+            self.cache.setup(settings.memory_cache_url)
+            self.logger.warning(
+                f"Memory cache Configured: '{settings.memory_cache_url}'"
+            )
         else:
             self.cache.disable()
             self.logger.warning("Cache Disabled")

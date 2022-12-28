@@ -5,13 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: FastAPI (Cashews mem Cache)",
+      "name": "Python: FastAPI (Dev)",
       "type": "python",
       "request": "launch",
       "module": "uvicorn",
       "args": ["arunapi.main:app", "--reload"],
       "env": {
-        "MEMORY_CACHE": "true"
+        "ENVIRONMENT": "dev"
       },
       "jinja": true,
       "justMyCode": true
@@ -23,22 +23,8 @@
       "module": "uvicorn",
       "args": ["arunapi.main:app", "--reload"],
       "env": {
-        "REDIS_URL": "redis://superbox:6379"
+        "CACHE__REDIS_URL": "redis://superbox:6379"
       },
-      "jinja": true,
-      "justMyCode": true
-    },
-    {
-      "name": "Python: Flask",
-      "type": "python",
-      "request": "launch",
-      "module": "flask",
-      "env": {
-        "FLASK_APP": "arunapi/app.py",
-        "FLASK_ENV": "development",
-        "REDIS_URL": "redis://127.0.0.1:6379"
-      },
-      "args": ["run", "--no-debugger"],
       "jinja": true,
       "justMyCode": true
     }

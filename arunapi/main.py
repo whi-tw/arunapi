@@ -3,24 +3,12 @@ import logging
 from fastapi import FastAPI, Request, Response
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
-from . import __version__
 from .cache import Cache
 from .routers import refuse
 from .settings import Settings
 
 settings = Settings()
-
-app = FastAPI(
-    title="Arun DC API",
-    description="The missing API for Arun District Council services",
-    version=__version__,
-    contact={
-        "name": "Tom Whitwell",
-        "url": "https://whi.tw/ell",
-        "email": "arunapi@mail.whi.tw",
-    },
-    docs_url="/",
-)
+app = FastAPI(**settings.app.dict())
 app.state.settings = settings
 
 
@@ -36,7 +24,7 @@ app.include_router(refuse.router)
 
 @app.on_event("startup")
 async def init_cache():
-    cache = Cache(settings.cache_url)
+    cache = Cache(settings.cache)
     app.state.cache = cache
 
 
