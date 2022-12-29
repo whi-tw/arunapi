@@ -2,14 +2,19 @@ import logging
 
 from fastapi import FastAPI, Request, Response
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
 
 from .cache import Cache
 from .routers import refuse
 from .settings import Settings
 
 settings = Settings()
+
 app = FastAPI(**settings.app.dict())
 app.state.settings = settings
+
+settings.telemetry(app.state.settings)
+LoggingInstrumentor().instrument(set_logging_format=True)
 
 
 @app.middleware("http")

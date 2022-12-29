@@ -3,8 +3,11 @@ from datetime import datetime, timedelta
 from typing import Any, Tuple, Union
 
 from cashews import Cache as Cashews
+from opentelemetry.instrumentation.redis import RedisInstrumentor
 
 from .settings import CacheSettings
+
+RedisInstrumentor().instrument()
 
 
 class NotInCache(Exception):

@@ -7,6 +7,7 @@ from pydantic import (
     BaseSettings,
     EmailStr,
     HttpUrl,
+    PyObject,
     RedisDsn,
     validator,
 )
@@ -63,10 +64,16 @@ class CacheSettings(BaseModel):
 
 class Settings(BaseSettings):
     environment: str = "prod"
+    name: str = "arunapi"
 
     app: AppSettings = AppSettings()
 
     cache: CacheSettings = CacheSettings()
+
+    telemetry: PyObject = "arunapi.telemetry.console"
+
+    telemetry_jaeger_grpc_endpoint: Optional[str] = None
+    telemetry_jaeger_thrift_url: Optional[str] = None
 
     class Config:
         env_nested_delimiter = "__"
