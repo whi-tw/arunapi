@@ -1,41 +1,44 @@
 [tool.poetry]
+authors = ["Tom Whitwell <tom@whi.tw>"]
+description = ""
 name = "arunapi"
 version = "0.1.0"
-description = ""
-authors = ["Tom Whitwell <tom@whi.tw>"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
 beautifulsoup4 = "^4.11.1"
-gunicorn = "^20.1.0"
-redis = "^4.2.2"
-fastapi = "^0.75.2"
-uvicorn = "^0.17.6"
-postcode-validator = "^0.0.4"
-httpx = "^0.22.0"
-email-validator = "^1.2.0"
-ics = "^0.7"
 cashews = {extras = ["redis"], version = "^4.2.1"}
-semver = "^2.13.0"
+email-validator = "^1.2.0"
+fastapi = "^0.75.2"
+grpcio = {file = "grpcio-1.51.1-cp310-cp310-macosx_11_0_arm64.whl"}
+gunicorn = "^20.1.0"
+httpx = "^0.22.0"
+ics = "^0.7"
 opentelemetry-api = "^1.15.0"
-opentelemetry-sdk = "^1.15.0"
+opentelemetry-exporter-jaeger = "^1.15.0"
 opentelemetry-instrumentation-fastapi = "^0.36b0"
 opentelemetry-instrumentation-httpx = "^0.36b0"
-opentelemetry-exporter-jaeger = "^1.15.0"
+opentelemetry-sdk = "^1.15.0"
+postcode-validator = "^0.0.4"
+python = "^3.10"
+redis = "^4.2.2"
+semver = "^2.13.0"
+uvicorn = "^0.17.6"
+opentelemetry-instrumentation-redis = "^0.36b0"
+opentelemetry-instrumentation-logging = "^0.36b0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^5.2"
 black = "^22.3.0"
 flake8 = "^4.0.1"
 isort = "^5.11.4"
 opentelemetry-instrumentation = "^0.36b0"
+pytest = "^5.2"
 
 [tool.poetry.scripts]
-dev = "arunapi.dev:run_dev"
-bump_data__patch = "ci.bump_version:bump_patch"
-bump_data__minor = "ci.bump_version:bump_minor"
 bump_data__major = "ci.bump_version:bump_major"
+bump_data__minor = "ci.bump_version:bump_minor"
+bump_data__patch = "ci.bump_version:bump_patch"
 current_version = "arunapi.dev:current_version"
+dev = "arunapi.dev:run_dev"
 
 [tool.poetry.group.ci.dependencies]
 semver = "^2.13.0"
@@ -45,5 +48,5 @@ gitpython = "^3.1.29"
 profile = "black"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
