@@ -1,17 +1,21 @@
-FROM python:3.10-slim
-
-RUN pip install poetry
+FROM golang:1.18-buster as builder
 
 WORKDIR /app
+ADD . ./
 
-COPY poetry.lock pyproject.toml /app/
+RUN go build -o /arunapi
 
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev --no-interaction --no-ansi
+FROM gcr.io/distroless/base-debian10
 
-COPY arunapi /app/arunapi
-COPY docker-entrypoint.sh /
+WORKDIR /
 
-EXPOSE 8000
+COPY --from=builder /arunapi /arunapi
 
-CMD ["/docker-entrypoint.sh"]
+ENV PORT 8080
+ENV GIN_MODE release
+
+EXPOSE 8080
+
+USER nonroot:nonroot
+
+ENTRYPOINT ["/arunapi"]
