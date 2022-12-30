@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	ics "github.com/arran4/golang-ical"
+	"github.com/google/uuid"
 )
 
 type NextRefuseCollection struct {
@@ -147,4 +149,60 @@ func getCollectionDateFromResponseLine(trimmed string) (CollectionDate, error) {
 		return CollectionDate{}, err
 	}
 	return CollectionDate{collectionTime}, nil
+}
+
+func (r *NextRefuseCollection) GetCollectionCalendarForPostcode(ctx context.Context, postcode string, transparentEvents bool, todoTime *time.Time) (string, error) {
+	nextCollectionData, err := r.GetCollectionForPostcode(ctx, postcode)
+	if err != nil {
+		return "", fmt.Errorf("error getting next collection: %v", err)
+	}
+
+	cal := ics.NewCalendar()
+	cal.SetProductId("arunapi")
+	cal.SetMethod(ics.MethodPublish)
+	cal.SetName(fmt.Sprintf("Refuse Collection for %s", postcode))
+	cal.SetDescription(fmt.Sprintf("Arun District Council Refuse Collection for %s", postcode))
+	if nextCollectionData.NextRubbish != nil {
+		cal.AddVEvent(createCalendarEventForCollectionDate(nextCollectionData.NextRubbish, "Rubbish", transparentEvents))
+	}
+	if nextCollectionData.NextRecycling != nil {
+		cal.AddVEvent(createCalendarEventForCollectionDate(nextCollectionData.NextRecycling, "Recycling", transparentEvents))
+	}
+	if nextCollectionData.NextFoodWaste != nil {
+		cal.AddVEvent(createCalendarEventForCollectionDate(nextCollectionData.NextFoodWaste, "Food Waste", transparentEvents))
+	}
+	return cal.Serialize(), nil
+}
+
+func createCalendarEventForCollectionDate(collectionDate *CollectionDate, collectionType string, transparent bool) *ics.VEvent {
+	icalDateFormatLocal := "20060102"
+
+	event := ics.NewEvent(uuid.NewString())
+	event.SetCreatedTime(time.Now())
+	event.SetDtStampTime(time.Now())
+	event.SetModifiedAt(time.Now())
+	event.SetProperty("DTSTART;VALUE=DATE", collectionDate.Time.Format(icalDateFormatLocal))
+	if transparent {
+		event.SetTimeTransparency(ics.TransparencyTransparent)
+	} else {
+		event.SetTimeTransparency(ics.TransparencyOpaque)
+	}
+	event.SetSummary(fmt.Sprintf("%s Collection", collectionType))
+	event.SetDescription(fmt.Sprintf("%s Collection", collectionType))
+	return event
+}
+
+func createTodoItemForCollection(collectionDate *CollectionDate, todoTime *time.Time, collectionType string) *ics.VTodo {
+	icalTimestampFormatUtc := "20060102T150405Z"
+	//icalDateFormatUtc := "20060102Z"
+	todoStartTime := collectionDate.Time.AddDate(0, 0, -1)
+	todoDueTime := time.Date(todoStartTime.Year(), todoStartTime.Month(), todoStartTime.Day(), todoTime.Hour(), todoTime.Minute(), 0, 0, time.UTC)
+	todo := ics.VTodo{}
+	todo.SetProperty("UID", uuid.NewString())
+	todo.SetProperty("DTSTAMP", time.Now().Format(icalTimestampFormatUtc))
+	todo.SetProperty("DTSTART", todoStartTime.Format(icalTimestampFormatUtc))
+	todo.SetProperty("DUE", todoDueTime.Format(icalTimestampFormatUtc))
+	todo.SetProperty("SUMMARY", fmt.Sprintf("Take out %s bin", collectionType))
+	todo.SetProperty("STATUS", "NEEDS-ACTION")
+	return &todo
 }

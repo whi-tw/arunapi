@@ -4,7 +4,9 @@ go 1.18
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/arran4/golang-ical v0.0.0-20221122102835-109346913e54
 	github.com/gin-gonic/gin v1.8.2
+	github.com/google/uuid v1.3.0
 	github.com/spf13/viper v1.14.0
 )
 

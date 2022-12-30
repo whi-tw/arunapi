@@ -15,10 +15,12 @@ func NewRouter() *gin.Engine {
 	router.GET("/health", health.Status)
 	v1 := router.Group("refuse")
 	{
-		userGroup := v1.Group("next_collection")
+		nextCollectionGroup := v1.Group("next_collection")
 		{
-			user := new(controllers.NextRefuseCollectionController)
-			userGroup.GET("/:postcode", user.Retrieve)
+			nextCollectionController := new(controllers.NextRefuseCollectionController)
+			nextCollectionGroup.GET("/:postcode", nextCollectionController.Retrieve)
+			nextCollectionGroup.GET("/:postcode/calendar", nextCollectionController.Calendar)
+			nextCollectionGroup.GET("/:postcode/calendar.ics", nextCollectionController.Calendar)
 		}
 	}
 	return router
