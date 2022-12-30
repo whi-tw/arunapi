@@ -7,6 +7,7 @@ require (
 	github.com/arran4/golang-ical v0.0.0-20221122102835-109346913e54
 	github.com/gin-gonic/gin v1.8.2
 	github.com/google/uuid v1.3.0
+	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
 )
 
@@ -19,6 +20,7 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
