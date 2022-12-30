@@ -1,12 +1,11 @@
 package server
 
 import (
-	"fmt"
-	"github.com/whi-tw/arunapi/config"
+	"github.com/gin-gonic/gin"
 )
 
-func Init() {
-	cfg := config.GetConfig()
+func Init(listenAddress string, mode string) {
 	r := NewRouter()
-	_ = r.Run(fmt.Sprintf(":%s", cfg.Port))
+	gin.SetMode(mode)
+	_ = r.Run(listenAddress)
 }
