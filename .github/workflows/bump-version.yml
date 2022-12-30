@@ -20,10 +20,6 @@ jobs:
       - name: Generate new version
         id: version
         run: echo version="$(poetry run bump_data__patch)" >> $GITHUB_OUTPUT
-      - name: ⬆ Update fastapi __version__
-        run: |
-          echo '__version__ = "${{ fromJSON(steps.version.outputs.version).next_version }}"' \
-          | tee ./arunapi/__init__.py
       - name: 🏗 Set up yq
         uses: frenck/action-setup-yq@v1
       - name: ⬆ Update helm chart version
