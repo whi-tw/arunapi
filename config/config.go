@@ -5,13 +5,7 @@ import (
 	"log"
 )
 
-var config *Config
-
-type Config struct {
-	Port string `mapstructure:"port"`
-}
-
-func LoadConfig(environment string) error {
+func LoadConfig(environment string) {
 	viper.SetDefault("port", "8080")
 	viper.AddConfigPath(".")
 	viper.SetConfigName(environment)
