@@ -2,6 +2,8 @@ package models
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"net/http"
@@ -174,11 +176,17 @@ func (r *NextRefuseCollection) GetCollectionCalendarForPostcode(ctx context.Cont
 	return cal.Serialize(), nil
 }
 
+func generateCalendarEventUID(collectionDate *CollectionDate, collectionType string) string {
+	seed := fmt.Sprintf("%s-%s", collectionDate.Unix(), collectionType)
+	h := sha1.New()
+	h.Write([]byte(seed))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
 func createCalendarEventForCollectionDate(collectionDate *CollectionDate, collectionType string, transparent bool) *ics.VEvent {
 	icalDateFormatLocal := "20060102"
-
-	event := ics.NewEvent(uuid.NewString())
-	event.SetCreatedTime(time.Now())
+	event := ics.NewEvent(generateCalendarEventUID(collectionDate, collectionType))
+	event.SetCreatedTime(collectionDate.Time.AddDate(0, 0, 14))
 	event.SetDtStampTime(time.Now())
 	event.SetModifiedAt(time.Now())
 	event.SetProperty("DTSTART;VALUE=DATE", collectionDate.Time.Format(icalDateFormatLocal))
